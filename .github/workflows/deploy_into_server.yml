@@ -6,7 +6,7 @@ jobs:
     name: Build WorkTimeMeasure Server App
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout commit $env.GITHUB_SHA
+      - name: Checkout commit $GITHUB_SHA
         uses: actions/checkout@v3
       - name: Setup Java 17 with Apache Maven
         uses: actions/setup-java@v3
@@ -54,8 +54,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           name: id_rsa
           known_hosts: ${{ secrets.SSH_HOST_KEY }}
-#      - name: Add server as known host
-#        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} -p ${{ secrets.SSH_PORT }} >> ~/.ssh/known_hosts
       - name: Copy zip file to server
-        run: "scp -i ~/.ssh/id_rsa ./artifacts_${{ steps.get_build_date.outputs.build_date }}.zip -P ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~"
+        run: "scp -i ~/.ssh/id_rsa -P ${{ secrets.SSH_PORT }} ./artifacts_${{ steps.get_build_date.outputs.build_date }}.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~"
 
