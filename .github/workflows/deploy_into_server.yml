@@ -6,7 +6,7 @@ jobs:
     name: Build WorkTimeMeasure Server App
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout commit $GITHUB_SHA"
+      - name: Checkout commit ${{ github.sha }}
         uses: actions/checkout@v3
       - name: Setup Java 17 with Apache Maven
         uses: actions/setup-java@v3
