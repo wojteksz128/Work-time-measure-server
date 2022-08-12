@@ -12,6 +12,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>api-version</module>
         <module>server</module>
     </modules>
 

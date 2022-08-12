@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Work-time-measure-server.iml" filepath="$PROJECT_DIR$/.idea/Work-time-measure-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/api-version.iml" filepath="$PROJECT_DIR$/api-version.iml" />
       <module fileurl="file://$PROJECT_DIR$/server/work-time-measure-server.iml" filepath="$PROJECT_DIR$/server/work-time-measure-server.iml" />
     </modules>
   </component>
