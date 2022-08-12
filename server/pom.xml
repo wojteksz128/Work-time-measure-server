@@ -30,6 +30,7 @@
     </dependencies>
 
     <build>
+        <finalName>work-time-measure-server</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

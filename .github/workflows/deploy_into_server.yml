@@ -1,0 +1,84 @@
+name: deploy_into_server
+on:
+  push
+jobs:
+  build_server_app:
+    name: Build WorkTimeMeasure Server App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout commit ${{ github.sha }}
+        uses: actions/checkout@v3
+      - name: Setup Java 17 with Apache Maven
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+      - name: Process building
+        run: mvn -B package --file server/pom.xml
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: work-time-measure-server
+          path: |
+            Dockerfile
+            docker-compose.yml
+            server/target/work-time-measure-server.jar
+          if-no-files-found: error
+
+  copy_artifact_to_server:
+    name: Copy artifact to server
+    needs:
+      - build_server_app
+    runs-on: ubuntu-latest
+    outputs:
+      build_date: ${{ steps.get_build_date.outputs.build_date }}
+    steps:
+      - name: Get build date
+        id: get_build_date
+        run: echo "::set-output name=build_date::`date --utc +%Y-%m-%dT%H_%M_%S.%3N`"
+      - name: Create artifacts directory
+        run: mkdir -p ./artifacts
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: work-time-measure-server
+          path: ./artifacts
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ./artifacts
+      - name: Pack to ZIP file
+        run: zip -r ./artifacts_${{ steps.get_build_date.outputs.build_date }}.zip ./artifacts/**
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.SSH_HOST_KEY }}
+      - name: Copy zip file to server
+        run: "scp -i ~/.ssh/id_rsa -P ${{ secrets.SSH_PORT }} ./artifacts_${{ steps.get_build_date.outputs.build_date }}.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~"
+
+  run_new_app_version:
+    name: Run new app version
+    needs:
+      - copy_artifact_to_server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.SSH_HOST_KEY }}
+      - name: Kill running stack
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose down; echo\""
+      - name: Remove artifacts.old if exists
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"if [ -d ~/artifacts.old ]; then rm -rf ~/artifacts.old; fi\""
+      - name: Rename artifacts to artifacts.old if artifacts exists
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"if [ -d ~/artifacts ]; then mv ~/artifacts ~/artifacts.old; fi\""
+      - name: Unzip new artifacts
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"unzip ./artifacts_${{ needs.copy_artifact_to_server.outputs.build_date }}.zip\""
+      - name: Build new images
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose build\""
+      - name: Create and run new stack
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose create; docker compose start\""
