@@ -10,7 +10,9 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="api-version" target="17" />
       <module name="work-time-measure-server" target="17" />
+      <module name="Work-time-measure-server" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

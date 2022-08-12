@@ -11,8 +11,10 @@
     <groupId>net.wojteksz128</groupId>
     <artifactId>work-time-measure-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>work-time-measure-server</name>
-    <description>work-time-measure-server</description>
+
+    <name>Work Time Measure Server &gt; Server</name>
+    <packaging>jar</packaging>
+
     <properties>
         <java.version>17</java.version>
     </properties>
