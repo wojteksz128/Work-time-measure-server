@@ -1,0 +1,7 @@
+services:
+  work_time_measure_server:
+    container_name: server
+    build: .
+    image: wojteksz128/work_time_measure_server:latest
+    ports:
+      - "8080:8080"
