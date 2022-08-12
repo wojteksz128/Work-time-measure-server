@@ -22,7 +22,8 @@ jobs:
           name: work-time-measure-server
           path: |
             Dockerfile
-            server/target/*.jar
+            docker-compose.yml
+            server/target/work-time-measure-server.jar
           if-no-files-found: error
 
   copy_artifact_to_server:
@@ -38,7 +39,7 @@ jobs:
         run: echo "::set-output name=build_date::`date --utc +%Y-%m-%dT%H_%M_%S.%3N`"
       - name: Create artifacts directory
         run: mkdir -p ./artifacts
-      - name: Donwload artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: work-time-measure-server
@@ -57,3 +58,27 @@ jobs:
       - name: Copy zip file to server
         run: "scp -i ~/.ssh/id_rsa -P ${{ secrets.SSH_PORT }} ./artifacts_${{ steps.get_build_date.outputs.build_date }}.zip ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:~"
 
+  run_new_app_version:
+    name: Run new app version
+    needs:
+      - copy_artifact_to_server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.SSH_HOST_KEY }}
+      - name: Kill running stack
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose down; echo\""
+      - name: Remove artifacts.old if exists
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"if [ -d ~/artifacts.old ]; then rm -rf ~/artifacts.old; fi\""
+      - name: Rename artifacts to artifacts.old if artifacts exists
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"if [ -d ~/artifacts ]; then mv ~/artifacts ~/artifacts.old; fi\""
+      - name: Unzip new artifacts
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"unzip ./artifacts_${{ needs.copy_artifact_to_server.outputs.build_date }}.zip\""
+      - name: Build new images
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose build\""
+      - name: Create and run new stack
+        run: "ssh -i ~/.ssh/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \"cd ~/artifacts/; docker compose create; docker compose start\""
