@@ -15,7 +15,7 @@ jobs:
           java-version: '17'
           cache: 'maven'
       - name: Process building
-        run: mvn -B package --file server/pom.xml
+        run: mvn -B package --file ./pom.xml
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
