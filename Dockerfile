@@ -1,6 +1,6 @@
 FROM openjdk:17
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN adduser -U spring
 USER spring:spring
 
 ARG JAR_FILE=server/target/work-time-measure-server.jar
