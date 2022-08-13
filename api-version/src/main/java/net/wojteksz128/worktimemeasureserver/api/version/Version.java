@@ -43,6 +43,24 @@ public record Version(int major, int minor) implements Comparable<Version> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Version version = (Version) o;
+
+        if (major != version.major) return false;
+        return minor == version.minor;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = major;
+        result = 31 * result + minor;
+        return result;
+    }
+
+    @Override
     public String toString() {
         return String.format("%s%d.%d", VERSION_PREFIX, major(), minor());
     }
