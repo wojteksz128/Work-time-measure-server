@@ -13,20 +13,24 @@ class VersionRangeTest {
 
     @ParameterizedTest
     @MethodSource("provideArgumentsFor_whenVersionRangeBoundariesAreProvided_create_versionRangeObject")
-    public void whenVersionRangeBoundariesAreProvided_create_versionRangeObject(String from, String to) {
+    public void whenVersionRangeBoundariesAreProvided_create_versionRangeObject(String from, String to, String expectedFrom, String expectedTo) {
         VersionRange versionRange = new VersionRange(from, to);
 
-        assertEquals(Version.of(from), versionRange.getFrom());
-        assertEquals(Version.of(to), versionRange.getTo());
+        assertEquals(Version.of(expectedFrom), versionRange.getFrom());
+        assertEquals(Version.of(expectedTo), versionRange.getTo());
     }
 
     private static Stream<Arguments> provideArgumentsFor_whenVersionRangeBoundariesAreProvided_create_versionRangeObject() {
         return Stream.of(
-                Arguments.of("v1.0", "v1.0"),
-                Arguments.of("v1.0", "v1.1"),
-                Arguments.of("v1.0", "v2.0"),
-                Arguments.of("v1.0", "v2.1"),
-                Arguments.of("v1.0", "v2147483647.2147483647")
+                Arguments.of("v1.0", "v1.0", "v1.0", "v1.0"),
+                Arguments.of("v1.0", "v1.1", "v1.0", "v1.1"),
+                Arguments.of("v1.0", "v2.0", "v1.0", "v2.0"),
+                Arguments.of("v1.0", "v2.1", "v1.0", "v2.1"),
+                Arguments.of("v1.0", "v2147483647.2147483647", "v1.0", "v2147483647.2147483647"),
+                Arguments.of("v1.0", "", "v1.0", "v2147483647.2147483647"),
+                Arguments.of("v1.0", null, "v1.0", "v2147483647.2147483647"),
+                Arguments.of("", "v2.0", "v0.0", "v2.0"),
+                Arguments.of(null, "v2.0", "v0.0", "v2.0")
         );
     }
 
@@ -41,14 +45,14 @@ class VersionRangeTest {
 
     public static Stream<Arguments> provideArgumentsFor_whenIncorrectVersionRangeAreProvided_throw_incorrectVersionException() {
         return Stream.of(
-                Arguments.of(null, null, new IncorrectVersionException("'from' argument cannot be null")),
-                Arguments.of("", null, new IllegalVersionFormatException("Version code do not match version pattern: [v]0.0 (current value: '')")),
-                Arguments.of("v1.0", null, new IllegalVersionFormatException("Version code cannot be null")),
-                Arguments.of("v2.0", "v1.0", new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: v2.0, to: v1.0)")),
-                Arguments.of("v1.1", "v1.0", new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: v1.1, to: v1.0)"))
+                Arguments.of(null, null, new IncorrectVersionRangeException("'from' or 'to' must be specified")),
+                Arguments.of("", null, new IncorrectVersionRangeException("'from' or 'to' must be specified")),
+                Arguments.of(null, "", new IncorrectVersionRangeException("'from' or 'to' must be specified")),
+                Arguments.of("", "", new IncorrectVersionRangeException("'from' or 'to' must be specified")),
+                Arguments.of("v2.0", "v1.0", new IncorrectVersionRangeException("'from' version cannot be greater then 'to' version (from: v2.0, to: v1.0)")),
+                Arguments.of("v1.1", "v1.0", new IncorrectVersionRangeException("'from' version cannot be greater then 'to' version (from: v1.1, to: v1.0)"))
         );
     }
-
 
 
     @ParameterizedTest

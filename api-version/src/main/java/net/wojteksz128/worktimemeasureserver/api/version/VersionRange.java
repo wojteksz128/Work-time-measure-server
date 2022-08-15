@@ -1,5 +1,7 @@
 package net.wojteksz128.worktimemeasureserver.api.version;
 
+import org.springframework.util.StringUtils;
+
 import java.util.Objects;
 
 public class VersionRange {
@@ -9,21 +11,29 @@ public class VersionRange {
 
     public VersionRange(String from, String to) {
         checkVersionRange(from, to);
-        this.from = Version.of(from);
-        this.to = Version.of(to);
+        this.from = getFromVersion(from);
+        this.to = getToVersion(to);
     }
 
     private static void checkVersionRange(String from, String to) {
-        if (from == null) {
-            throw new IncorrectVersionException("'from' argument cannot be null");
+        if (!StringUtils.hasText(from) && !StringUtils.hasText(to)) {
+            throw new IncorrectVersionRangeException("'from' or 'to' must be specified");
         }
 
-        checkVersionRange(Version.of(from), Version.of(to));
+        checkVersionRange(getFromVersion(from), getToVersion(to));
+    }
+
+    private static Version getFromVersion(String from) {
+        return Version.of(StringUtils.hasText(from) ? from : Version.MIN_VERSION);
+    }
+
+    private static Version getToVersion(String to) {
+        return Version.of(StringUtils.hasText(to) ? to : Version.MAX_VERSION);
     }
 
     private static void checkVersionRange(Version from, Version to) {
         if (from.compareTo(to) > 0) {
-            throw new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
+            throw new IncorrectVersionRangeException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
         }
     }
 

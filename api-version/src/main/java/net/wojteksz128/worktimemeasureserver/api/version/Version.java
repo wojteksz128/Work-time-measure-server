@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Version implements Comparable<Version> {
+    public static final String MIN_VERSION = "v0.0";
     public static final String MAX_VERSION = "v2147483647.2147483647";
     public static final String VERSION_PREFIX = "v";
     public static final String VERSION_PARTS_DELIMITER = ".";
@@ -18,7 +19,7 @@ public final class Version implements Comparable<Version> {
     private final int minor;
 
     private Version() {
-        this(MAJOR_NO_VERSION, MINOR_NO_VERSION);
+        this(MIN_VERSION);
     }
 
     private Version(String versionCode) {
