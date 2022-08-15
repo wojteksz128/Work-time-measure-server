@@ -47,13 +47,13 @@ class VersionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException")
-    public void oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException(String versionCode, String expectedMessage) {
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Version.of(versionCode));
-        assertEquals(expectedMessage, illegalArgumentException.getMessage());
+    @MethodSource("provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalVersionFormatException")
+    public void oneStringVersionConstructorHasIncorrectFormat_throws_illegalVersionFormatException(String versionCode, String expectedMessage) {
+        IllegalVersionFormatException illegalVersionFormatException = assertThrows(IllegalVersionFormatException.class, () -> Version.of(versionCode));
+        assertEquals(expectedMessage, illegalVersionFormatException.getMessage());
     }
 
-    private static Stream<Arguments> provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException() {
+    private static Stream<Arguments> provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalVersionFormatException() {
         return Stream.of(
                 Arguments.of(null, "Version code cannot be null"),
                 Arguments.of("", "Version code do not match version pattern: [v]0.0 (current value: '')"),
@@ -96,13 +96,13 @@ class VersionTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalArgumentException")
-    public void twoIllegalIntsVersionConstructor_throws_illegalArgumentException(int major, int minor, String expectedMessage) {
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Version.of(major, minor));
-        assertEquals(expectedMessage, illegalArgumentException.getMessage());
+    @MethodSource("provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalVersionFormatException")
+    public void twoIllegalIntsVersionConstructor_throws_illegalVersionFormatException(int major, int minor, String expectedMessage) {
+        IllegalVersionFormatException illegalVersionFormatException = assertThrows(IllegalVersionFormatException.class, () -> Version.of(major, minor));
+        assertEquals(expectedMessage, illegalVersionFormatException.getMessage());
     }
 
-    private static Stream<Arguments> provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalArgumentException() {
+    private static Stream<Arguments> provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalVersionFormatException() {
         return Stream.of(
                 Arguments.of(-1, 1, "Major cannot be negative (-1)."),
                 Arguments.of(1, -1, "Minor cannot be negative (-1)."),

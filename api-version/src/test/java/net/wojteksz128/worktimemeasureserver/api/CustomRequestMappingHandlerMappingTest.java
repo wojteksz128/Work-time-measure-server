@@ -1,5 +1,6 @@
 package net.wojteksz128.worktimemeasureserver.api;
 
+import net.wojteksz128.worktimemeasureserver.api.version.IncorrectVersionedResourceException;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResource;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResourceRequestCondition;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,8 +74,8 @@ class CustomRequestMappingHandlerMappingTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsFor_gettingCustomTypeConditionForClassAnnotatedByWrongUsedVersionedResource_throws_illegalStateException")
     public void gettingCustomTypeConditionForClassAnnotatedByWrongUsedVersionedResource_throws_illegalStateException(Class<?> webClass, String expectedMessage) {
-        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> requestMappingHandlerMapping.getCustomTypeCondition(webClass));
-        assertEquals(expectedMessage, illegalStateException.getMessage());
+        IncorrectVersionedResourceException incorrectVersionedResourceException = assertThrows(IncorrectVersionedResourceException.class, () -> requestMappingHandlerMapping.getCustomTypeCondition(webClass));
+        assertEquals(expectedMessage, incorrectVersionedResourceException.getMessage());
     }
 
     private static Stream<Arguments> provideArgumentsFor_gettingCustomTypeConditionForClassAnnotatedByWrongUsedVersionedResource_throws_illegalStateException() {

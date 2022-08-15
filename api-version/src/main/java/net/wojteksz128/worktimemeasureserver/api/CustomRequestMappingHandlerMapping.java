@@ -1,5 +1,6 @@
 package net.wojteksz128.worktimemeasureserver.api;
 
+import net.wojteksz128.worktimemeasureserver.api.version.IncorrectVersionedResourceException;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResource;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResourceRequestCondition;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -28,7 +29,7 @@ public class CustomRequestMappingHandlerMapping extends RequestMappingHandlerMap
             return null;
         }
         if (!StringUtils.hasText(versionMapping.media()) && !StringUtils.hasText(versionMapping.from())) {
-            throw new IllegalStateException("VersionedResource annotation must define media type or version range for resource");
+            throw new IncorrectVersionedResourceException("VersionedResource annotation must define media type or version range for resource");
         }
         return new VersionedResourceRequestCondition(versionMapping.media(), versionMapping.from(), versionMapping.to());
     }

@@ -31,20 +31,21 @@ class VersionRangeTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideArgumentsFor_whenIncorrectVersionRangeAreProvided_throw_illegalArgumentException")
-    public void whenIncorrectVersionRangeAreProvided_throw_illegalArgumentException(String from, String to, String expectedMessage) {
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> new VersionRange(from, to));
+    @MethodSource("provideArgumentsFor_whenIncorrectVersionRangeAreProvided_throw_incorrectVersionException")
+    public void whenIncorrectVersionRangeAreProvided_throw_incorrectVersionException(String from, String to, Exception expectedException) {
+        Exception actualException = assertThrows(Exception.class, () -> new VersionRange(from, to));
 
-        assertEquals(expectedMessage, illegalArgumentException.getMessage());
+        assertEquals(expectedException.getClass(), actualException.getClass());
+        assertEquals(expectedException.getMessage(), actualException.getMessage());
     }
 
-    public static Stream<Arguments> provideArgumentsFor_whenIncorrectVersionRangeAreProvided_throw_illegalArgumentException() {
+    public static Stream<Arguments> provideArgumentsFor_whenIncorrectVersionRangeAreProvided_throw_incorrectVersionException() {
         return Stream.of(
-                Arguments.of(null, null, "'from' argument cannot be null"),
-                Arguments.of("", null, "Version code do not match version pattern: [v]0.0 (current value: '')"),
-                Arguments.of("v1.0", null, "Version code cannot be null"),
-                Arguments.of("v2.0", "v1.0", "'from' version cannot be greater then 'to' version (from: v2.0, to: v1.0)"),
-                Arguments.of("v1.1", "v1.0", "'from' version cannot be greater then 'to' version (from: v1.1, to: v1.0)")
+                Arguments.of(null, null, new IncorrectVersionException("'from' argument cannot be null")),
+                Arguments.of("", null, new IllegalVersionFormatException("Version code do not match version pattern: [v]0.0 (current value: '')")),
+                Arguments.of("v1.0", null, new IllegalVersionFormatException("Version code cannot be null")),
+                Arguments.of("v2.0", "v1.0", new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: v2.0, to: v1.0)")),
+                Arguments.of("v1.1", "v1.0", new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: v1.1, to: v1.0)"))
         );
     }
 

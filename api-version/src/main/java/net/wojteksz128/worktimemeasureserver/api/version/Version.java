@@ -41,11 +41,11 @@ public final class Version implements Comparable<Version> {
 
     private static void checkVersionCode(String versionCode) {
         if (versionCode == null) {
-            throw new IllegalArgumentException("Version code cannot be null");
+            throw new IllegalVersionFormatException("Version code cannot be null");
         }
         Matcher matcher = versionPattern.matcher(versionCode);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException("Version code do not match version pattern: [%s]0%s0 (current value: '%s')".formatted(VERSION_PREFIX, VERSION_PARTS_DELIMITER, versionCode));
+            throw new IllegalVersionFormatException("Version code do not match version pattern: [%s]0%s0 (current value: '%s')".formatted(VERSION_PREFIX, VERSION_PARTS_DELIMITER, versionCode));
         }
 
         int major = Integer.parseInt(matcher.group(1));
@@ -70,7 +70,7 @@ public final class Version implements Comparable<Version> {
 
         if (!errorMessage.isEmpty()) {
             errorMessage.deleteCharAt(errorMessage.length() - 1);
-            throw new IllegalArgumentException(errorMessage.toString());
+            throw new IllegalVersionFormatException(errorMessage.toString());
         }
     }
 
@@ -82,7 +82,7 @@ public final class Version implements Comparable<Version> {
         String[] tokens = version.split("\\%s".formatted(VERSION_PARTS_DELIMITER));
 
         if (tokens.length < versionPart) {
-            throw new IllegalArgumentException("Invalid version %s. The version must have major and minor number.".formatted(version));
+            throw new IllegalVersionFormatException("Invalid version %s. The version must have major and minor number.".formatted(version));
         }
 
         return Integer.parseInt(tokens[versionPart]);

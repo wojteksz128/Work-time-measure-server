@@ -15,7 +15,7 @@ public class VersionRange {
 
     private static void checkVersionRange(String from, String to) {
         if (from == null) {
-            throw new IllegalArgumentException("'from' argument cannot be null");
+            throw new IncorrectVersionException("'from' argument cannot be null");
         }
 
         checkVersionRange(Version.of(from), Version.of(to));
@@ -23,7 +23,7 @@ public class VersionRange {
 
     private static void checkVersionRange(Version from, Version to) {
         if (from.compareTo(to) > 0) {
-            throw new IllegalArgumentException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
+            throw new IncorrectVersionException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
         }
     }
 
