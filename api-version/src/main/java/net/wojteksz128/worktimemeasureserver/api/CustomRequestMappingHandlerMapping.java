@@ -12,6 +12,8 @@ import java.lang.reflect.Method;
 
 public class CustomRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
 
+    // TODO: 15.08.2022 Get mapping for method
+
     @Override
     protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
         VersionedResource typeAnnotation = AnnotationUtils.findAnnotation(handlerType, VersionedResource.class);
@@ -28,7 +30,7 @@ public class CustomRequestMappingHandlerMapping extends RequestMappingHandlerMap
         if (versionMapping == null) {
             return null;
         }
-        if (!StringUtils.hasText(versionMapping.media()) && !StringUtils.hasText(versionMapping.from())) {
+        if (!StringUtils.hasText(versionMapping.media()) && !StringUtils.hasText(versionMapping.from()) && !StringUtils.hasText(versionMapping.to())) {
             throw new IncorrectVersionedResourceException("VersionedResource annotation must define media type or version range for resource");
         }
         return new VersionedResourceRequestCondition(versionMapping.media(), versionMapping.from(), versionMapping.to());

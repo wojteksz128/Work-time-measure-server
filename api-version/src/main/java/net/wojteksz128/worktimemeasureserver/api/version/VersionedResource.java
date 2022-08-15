@@ -20,5 +20,5 @@ public @interface VersionedResource {
 
     String from() default "";
 
-    String to() default Version.MAX_VERSION;
+    String to() default "";
 }

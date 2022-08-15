@@ -28,11 +28,8 @@ public class VersionedResourceRequestCondition extends AbstractRequestCondition<
     private static Set<VersionRange> versionRange(String from, String to) {
         Set<VersionRange> versionRanges = new HashSet<>();
 
-        if (StringUtils.hasText(from)) {
-            String toVersion = (StringUtils.hasText(to) ? to : Version.MAX_VERSION);
-            VersionRange versionRange = new VersionRange(from, toVersion);
-
-            versionRanges.add(versionRange);
+        if (StringUtils.hasText(from) || StringUtils.hasText(to)) {
+            versionRanges.add(new VersionRange(from, to));
         }
         return versionRanges;
     }
