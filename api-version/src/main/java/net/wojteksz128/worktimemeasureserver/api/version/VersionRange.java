@@ -8,14 +8,37 @@ public class VersionRange {
     private final Version to;
 
     public VersionRange(String from, String to) {
-        this.from = new Version(from);
-        this.to = new Version(to);
+        checkVersionRange(from, to);
+        this.from = Version.of(from);
+        this.to = Version.of(to);
+    }
+
+    private static void checkVersionRange(String from, String to) {
+        if (from == null) {
+            throw new IllegalArgumentException("'from' argument cannot be null");
+        }
+
+        checkVersionRange(Version.of(from), Version.of(to));
+    }
+
+    private static void checkVersionRange(Version from, Version to) {
+        if (from.compareTo(to) > 0) {
+            throw new IllegalArgumentException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
+        }
     }
 
     public boolean includes(String other) {
-        Version otherVersion = new Version(other);
+        Version otherVersion = Version.of(other);
 
         return from.compareTo(otherVersion) <= 0 && to.compareTo(otherVersion) >= 0;
+    }
+
+    public Version getFrom() {
+        return from;
+    }
+
+    public Version getTo() {
+        return to;
     }
 
     @Override

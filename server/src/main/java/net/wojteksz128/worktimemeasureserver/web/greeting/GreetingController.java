@@ -16,7 +16,7 @@ public class GreetingController {
     private final AtomicLong counter = new AtomicLong();
 
     @GetMapping("/greeting")
-    @VersionedResource(from = ApiVersion.V1_0, to = ApiVersion.V1_0)
+    @VersionedResource(from = ApiVersion.V1_0/*, to = ApiVersion.V1_0*/)
     public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
         return new Greeting(counter.incrementAndGet(), String.format(template, name, ApiVersion.V1_0));
     }

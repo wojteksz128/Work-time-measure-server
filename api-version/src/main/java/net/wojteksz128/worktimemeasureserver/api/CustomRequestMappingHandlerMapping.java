@@ -3,6 +3,7 @@ package net.wojteksz128.worktimemeasureserver.api;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResource;
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResourceRequestCondition;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -23,10 +24,12 @@ public class CustomRequestMappingHandlerMapping extends RequestMappingHandlerMap
     }
 
     private RequestCondition<?> createCondition(VersionedResource versionMapping) {
-        if (versionMapping != null) {
-            return new VersionedResourceRequestCondition(versionMapping.media(), versionMapping.from(), versionMapping.to());
+        if (versionMapping == null) {
+            return null;
         }
-
-        return null;
+        if (!StringUtils.hasText(versionMapping.media()) && !StringUtils.hasText(versionMapping.from())) {
+            throw new IllegalStateException("VersionedResource annotation must define media type or version range for resource");
+        }
+        return new VersionedResourceRequestCondition(versionMapping.media(), versionMapping.from(), versionMapping.to());
     }
 }

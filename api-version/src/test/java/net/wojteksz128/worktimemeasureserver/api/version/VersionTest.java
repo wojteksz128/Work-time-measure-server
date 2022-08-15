@@ -8,14 +8,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VersionTest {
 
     @Test
     public void defaultVersionConstructor_shouldCreateVersionWithNoVersionApplied() {
-        final Version version = new Version();
+        final Version version = Version.of();
 
         assertEquals(Version.MAJOR_NO_VERSION, version.major());
         assertEquals(Version.MINOR_NO_VERSION, version.minor());
@@ -24,7 +23,7 @@ class VersionTest {
     @ParameterizedTest
     @MethodSource("provideArgumentsFor_oneStringVersionConstructor_creates_versionWithSpecifiedMajorAndMinorValues")
     public void oneStringVersionConstructor_creates_versionWithSpecifiedMajorAndMinorValues(String versionCode, int major, int minor) {
-        final Version version = new Version(versionCode);
+        final Version version = Version.of(versionCode);
 
         assertEquals(major, version.major());
         assertEquals(minor, version.minor());
@@ -48,9 +47,32 @@ class VersionTest {
     }
 
     @ParameterizedTest
+    @MethodSource("provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException")
+    public void oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException(String versionCode, String expectedMessage) {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Version.of(versionCode));
+        assertEquals(expectedMessage, illegalArgumentException.getMessage());
+    }
+
+    private static Stream<Arguments> provideArgumentsFor_oneStringVersionConstructorHasIncorrectFormat_throws_illegalArgumentException() {
+        return Stream.of(
+                Arguments.of(null, "Version code cannot be null"),
+                Arguments.of("", "Version code do not match version pattern: [v]0.0 (current value: '')"),
+                Arguments.of("1", "Version code do not match version pattern: [v]0.0 (current value: '1')"),
+                Arguments.of("v1", "Version code do not match version pattern: [v]0.0 (current value: 'v1')"),
+                Arguments.of(".0", "Version code do not match version pattern: [v]0.0 (current value: '.0')"),
+                Arguments.of("1.", "Version code do not match version pattern: [v]0.0 (current value: '1.')"),
+                Arguments.of("v.0", "Version code do not match version pattern: [v]0.0 (current value: 'v.0')"),
+                Arguments.of( "v1.", "Version code do not match version pattern: [v]0.0 (current value: 'v1.')"),
+                Arguments.of("v-1.0", "Major cannot be negative (-1)."),
+                Arguments.of("v1.-1", "Minor cannot be negative (-1)."),
+                Arguments.of("v-1.-1", "Major cannot be negative (-1). Minor cannot be negative (-1).")
+        );
+    }
+
+    @ParameterizedTest
     @MethodSource("provideArgumentsFor_twoIntsVersionConstructor_creates_versionWithSpecifiedMajorAndMinorValues")
     public void twoIntsVersionConstructor_creates_versionWithSpecifiedMajorAndMinorValues(int major, int minor) {
-        final Version version = new Version(major, minor);
+        final Version version = Version.of(major, minor);
 
         assertEquals(major, version.major());
         assertEquals(minor, version.minor());
@@ -74,10 +96,25 @@ class VersionTest {
     }
 
     @ParameterizedTest
+    @MethodSource("provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalArgumentException")
+    public void twoIllegalIntsVersionConstructor_throws_illegalArgumentException(int major, int minor, String expectedMessage) {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Version.of(major, minor));
+        assertEquals(expectedMessage, illegalArgumentException.getMessage());
+    }
+
+    private static Stream<Arguments> provideArgumentsFor_twoIllegalIntsVersionConstructor_throws_illegalArgumentException() {
+        return Stream.of(
+                Arguments.of(-1, 1, "Major cannot be negative (-1)."),
+                Arguments.of(1, -1, "Minor cannot be negative (-1)."),
+                Arguments.of(-1, -1, "Major cannot be negative (-1). Minor cannot be negative (-1).")
+        );
+    }
+
+    @ParameterizedTest
     @MethodSource("provideArgumentsFor_compareTwoVersions_returnsExpectedResult")
     public void compareTwoVersions_returnsExpectedResult(String versionCode1, String versionCode2, ComparingResult expectedResult) {
-        final Version version1 = new Version(versionCode1);
-        final Version version2 = new Version(versionCode2);
+        final Version version1 = Version.of(versionCode1);
+        final Version version2 = Version.of(versionCode2);
 
         assertTrue(switch (expectedResult) {
             case EQUALS -> version1.compareTo(version2) == 0 && version2.compareTo(version1) == 0;
