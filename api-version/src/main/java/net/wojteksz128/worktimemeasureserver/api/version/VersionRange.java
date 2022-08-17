@@ -62,8 +62,10 @@ public class VersionRange {
 
     public boolean includes(String other) {
         Version otherVersion = Version.of(other);
+        boolean isGreaterThanFrom = leftSideOpen ? from.compareTo(otherVersion) < 0 : from.compareTo(otherVersion) <= 0;
+        boolean isLowerThanTo = rightSideOpen ? to.compareTo(otherVersion) > 0 : to.compareTo(otherVersion) >= 0;
 
-        return from.compareTo(otherVersion) <= 0 && to.compareTo(otherVersion) >= 0;
+        return isGreaterThanFrom && isLowerThanTo;
     }
 
     public Version getFrom() {
