@@ -5,22 +5,43 @@ import org.springframework.util.StringUtils;
 import java.util.Objects;
 
 public class VersionRange {
+    private static final String LEFT_SIDE_OPEN_MARK = "(";
+    private static final String LEFT_SIDE_CLOSED_MARK = "[";
+    private static final String RIGHT_SIDE_OPEN_MARK = ")";
+    private static final String RIGHT_SIDE_CLOSED_MARK = "]";
 
     private final Version from;
     private final Version to;
+    private final boolean leftSideOpen;
+    private final boolean rightSideOpen;
 
     public VersionRange(String from, String to) {
-        checkVersionRange(from, to);
-        this.from = getFromVersion(from);
-        this.to = getToVersion(to);
+        this(from, to, false);
     }
 
-    private static void checkVersionRange(String from, String to) {
+    public VersionRange(String from, String to, boolean rightSideOpen) {
+        checkVersionRange(from, to, rightSideOpen);
+        this.from = getFromVersion(from);
+        this.to = getToVersion(to);
+        this.leftSideOpen = checkLeftSideWillBeOpen(from);
+        this.rightSideOpen = checkRightSideWillBeOpen(to, rightSideOpen);
+    }
+
+    private static void checkVersionRange(String from, String to, boolean rightSideOpen) {
         if (!StringUtils.hasText(from) && !StringUtils.hasText(to)) {
             throw new IncorrectVersionRangeException("'from' or 'to' must be specified");
         }
 
-        checkVersionRange(getFromVersion(from), getToVersion(to));
+        checkVersionRange(getFromVersion(from), getToVersion(to), rightSideOpen);
+    }
+
+    private static void checkVersionRange(Version from, Version to, boolean rightSideOpen) {
+        if (from.equals(to) && rightSideOpen) {
+            throw new IncorrectVersionRangeException("Range [%s-%s) is incorrect - the range does not contain any version".formatted(from, to));
+        }
+        if (from.compareTo(to) > 0) {
+            throw new IncorrectVersionRangeException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
+        }
     }
 
     private static Version getFromVersion(String from) {
@@ -31,10 +52,12 @@ public class VersionRange {
         return Version.of(StringUtils.hasText(to) ? to : Version.MAX_VERSION);
     }
 
-    private static void checkVersionRange(Version from, Version to) {
-        if (from.compareTo(to) > 0) {
-            throw new IncorrectVersionRangeException("'from' version cannot be greater then 'to' version (from: %s, to: %s)".formatted(from, to));
-        }
+    private static boolean checkLeftSideWillBeOpen(String from) {
+        return !StringUtils.hasText(from);
+    }
+
+    private static boolean checkRightSideWillBeOpen(String to, boolean rightSideOpen) {
+        return !StringUtils.hasText(to) || rightSideOpen;
     }
 
     public boolean includes(String other) {
@@ -49,6 +72,14 @@ public class VersionRange {
 
     public Version getTo() {
         return to;
+    }
+
+    public boolean isLeftSideOpen() {
+        return leftSideOpen;
+    }
+
+    public boolean isRightSideOpen() {
+        return rightSideOpen;
     }
 
     @Override
@@ -71,6 +102,6 @@ public class VersionRange {
 
     @Override
     public String toString() {
-        return String.format("range[%s-%s]", from, to);
+        return String.format("range%s%s-%s%s", (leftSideOpen ? LEFT_SIDE_OPEN_MARK : LEFT_SIDE_CLOSED_MARK), from, to, (rightSideOpen ? RIGHT_SIDE_OPEN_MARK : RIGHT_SIDE_CLOSED_MARK));
     }
 }
