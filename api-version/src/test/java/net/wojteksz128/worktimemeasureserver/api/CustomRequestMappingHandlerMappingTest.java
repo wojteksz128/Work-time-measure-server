@@ -3,14 +3,12 @@ package net.wojteksz128.worktimemeasureserver.api;
 import java.lang.reflect.Method;
 
 import net.wojteksz128.worktimemeasureserver.api.version.VersionedResourceRequestCondition;
-import net.wojteksz128.worktimemeasureserver.utils.argumentProvider.CreatingCustomMethodConditionNegativeTestArgumentProvider;
-import net.wojteksz128.worktimemeasureserver.utils.argumentProvider.CreatingCustomTypeConditionNegativeTestArgumentProvider;
-import net.wojteksz128.worktimemeasureserver.utils.argumentProvider.CreatingCustomMethodConditionPositiveTestArgumentProvider;
-import net.wojteksz128.worktimemeasureserver.utils.argumentProvider.CreatingCustomTypeConditionPositiveTestArgumentProvider;
+import net.wojteksz128.worktimemeasureserver.utils.argumentProvider.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,4 +57,23 @@ class CustomRequestMappingHandlerMappingTest {
         assertEquals(expectedException.getMessage(), actualException.getMessage());
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(CreatingRequestMappingInfoForMethodWithoutVersionedResourceAnnotationArgumentProvider.class)
+    public void creatingRequestMappingInfoWithoutVersionedResourceAnnotation_creates_requestMappingInfoWithoutVersionedResourceRequestCondition(Method method, Class<?> handlerClass, RequestMappingInfo expectedRequestMappingInfo) {
+        RequestMappingInfo actualRequestMappingInfo = requestMappingHandlerMapping.getMappingForMethod(method, handlerClass);
+
+        assertNotNull(actualRequestMappingInfo);
+        assertEquals(expectedRequestMappingInfo, actualRequestMappingInfo);
+        assertNull(actualRequestMappingInfo.getCustomCondition());
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(CreatingRequestMappingInfoForAnnotatedVersionedResourceAnnotationArgumentProvider.class)
+    public void creatingRequestMappingInfoForAnnotatedVersionedResource_creates_requestMappingInfoWithVersionedResourceRequestCondition(Method method, Class<?> handlerClass, RequestMappingInfo expectedRequestMappingInfo, VersionedResourceRequestCondition expectedVersionedResourceRequestCondition) {
+        RequestMappingInfo actualRequestMappingInfo = requestMappingHandlerMapping.getMappingForMethod(method, handlerClass);
+
+        assertNotNull(actualRequestMappingInfo);
+        assertEquals(expectedRequestMappingInfo, actualRequestMappingInfo);
+        assertEquals(expectedVersionedResourceRequestCondition, actualRequestMappingInfo.getCustomCondition());
+    }
 }

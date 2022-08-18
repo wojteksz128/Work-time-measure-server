@@ -6,6 +6,7 @@ import net.wojteksz128.worktimemeasureserver.api.version.VersionedResourceReques
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.lang.reflect.Method;
@@ -13,6 +14,11 @@ import java.lang.reflect.Method;
 public class CustomRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
 
     // TODO: 15.08.2022 Get mapping for method
+    @Override
+    protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+        RequestMappingInfo requestMappingInfo = super.getMappingForMethod(method, handlerType);
+        return requestMappingInfo;
+    }
 
     @Override
     protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
