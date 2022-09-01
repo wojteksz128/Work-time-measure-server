@@ -132,4 +132,21 @@ public final class Version implements Comparable<Version>, Serializable {
         return minor;
     }
 
+    // TODO: 01.09.2022 Version solver
+    public Version previous() {
+        if (minor > 0) {
+            return Version.of(major, minor - 1);
+        } else {
+            return Version.of(major - 1, Version.of(MAX_VERSION).minor);
+        }
+    }
+
+    // TODO: 01.09.2022 Version solver
+    public Version next() {
+        if (minor < Version.of(MAX_VERSION).minor) {
+            return Version.of(major, minor + 1);
+        } else {
+            return Version.of(major + 1, 0);
+        }
+    }
 }

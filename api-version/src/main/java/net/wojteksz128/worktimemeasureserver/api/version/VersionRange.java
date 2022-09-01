@@ -2,9 +2,10 @@ package net.wojteksz128.worktimemeasureserver.api.version;
 
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class VersionRange {
+public class VersionRange implements Serializable {
     private static final String LEFT_SIDE_OPEN_MARK = "(";
     private static final String LEFT_SIDE_CLOSED_MARK = "[";
     private static final String RIGHT_SIDE_OPEN_MARK = ")";
@@ -61,11 +62,44 @@ public class VersionRange {
     }
 
     public boolean includes(String other) {
-        Version otherVersion = Version.of(other);
-        boolean isGreaterThanFrom = leftSideOpen ? from.compareTo(otherVersion) < 0 : from.compareTo(otherVersion) <= 0;
-        boolean isLowerThanTo = rightSideOpen ? to.compareTo(otherVersion) > 0 : to.compareTo(otherVersion) >= 0;
+        return includes(Version.of(other));
+    }
+
+    public boolean includes(Version otherVersion) {
+        boolean isGreaterThanFrom = getFirstVersion().compareTo(otherVersion) <= 0;
+        boolean isLowerThanTo = getLastVersion().compareTo(otherVersion) >= 0;
 
         return isGreaterThanFrom && isLowerThanTo;
+    }
+
+    public boolean isSeparate(VersionRange other) {
+        return !includes(other.getFirstVersion())
+                && !includes(other.getLastVersion())
+                && !isInside(other);
+    }
+
+    public boolean isTouching(VersionRange other) {
+        return other.getFirstVersion().equals(getLastVersion())
+                || other.getLastVersion().equals(getFirstVersion());
+    }
+
+    public boolean isIntersected(VersionRange other) {
+        return other.includes(getFirstVersion())
+                || other.includes(getLastVersion())
+                || (from.compareTo(other.from) < 0 && to.compareTo(other.to) > 0);
+    }
+
+    public Version getFirstVersion() {
+        return leftSideOpen ? from.next() : from;
+    }
+
+    // TODO: 01.09.2022 Last version in range will be specified in this place?
+    public Version getLastVersion() {
+        return rightSideOpen ? to.previous() : to;
+    }
+
+    public boolean isInside(VersionRange other) {
+        return other.includes(from) && other.includes(to);
     }
 
     public Version getFrom() {

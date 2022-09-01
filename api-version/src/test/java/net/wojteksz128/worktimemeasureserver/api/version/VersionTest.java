@@ -139,4 +139,42 @@ class VersionTest {
                 Arguments.of("v1.0", "v1.1", ComparingResult.LOWER_THAN)
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("provideArgumentsFor_previousVersion_returnsExpectedResult")
+    public void previousVersion_returnsExpectedResult(Version version, Version expectedVersion) {
+        Version previous = version.previous();
+
+        assertEquals(expectedVersion, previous);
+    }
+
+    private static Stream<Arguments> provideArgumentsFor_previousVersion_returnsExpectedResult() {
+        return Stream.of(
+                Arguments.of(Version.of("v0.1"), Version.of("v0.0")),
+                Arguments.of(Version.of("v1.0"), Version.of("v0.2147483647")),
+                Arguments.of(Version.of("v1.1"), Version.of("v1.0")),
+                Arguments.of(Version.of("v1.2"), Version.of("v1.1")),
+                Arguments.of(Version.of("v1.2147483647"), Version.of("v1.2147483646")),
+                Arguments.of(Version.of("v2.0"), Version.of("v1.2147483647"))
+                );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArgumentsFor_nextVersion_returnsExpectedResult")
+    public void nextVersion_returnsExpectedResult(Version version, Version expectedVersion) {
+        Version next = version.next();
+
+        assertEquals(expectedVersion, next);
+    }
+
+    private static Stream<Arguments> provideArgumentsFor_nextVersion_returnsExpectedResult() {
+        return Stream.of(
+                Arguments.of(Version.of("v0.0"), Version.of("v0.1")),
+                Arguments.of(Version.of("v0.2147483647"), Version.of("v1.0")),
+                Arguments.of(Version.of("v1.0"), Version.of("v1.1")),
+                Arguments.of(Version.of("v1.1"), Version.of("v1.2")),
+                Arguments.of(Version.of("v1.2147483646"), Version.of("v1.2147483647")),
+                Arguments.of(Version.of("v1.2147483647"), Version.of("v2.0"))
+                );
+    }
 }
